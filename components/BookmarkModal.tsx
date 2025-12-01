@@ -28,6 +28,7 @@ const BookmarkModal: React.FC<BookmarkModalProps> = ({ isOpen, onClose, onSave, 
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
 
   useEffect(() => {
     if (initialData) {
@@ -61,23 +62,49 @@ const BookmarkModal: React.FC<BookmarkModalProps> = ({ isOpen, onClose, onSave, 
     if (result) {
       setTitle(result.title);
       setDescription(result.description);
-      const matchingTags = tags.filter(t => result.suggestedTags.some(suggested => suggested.toLowerCase() === t.name.toLowerCase()));
-      setSelectedTagIds(prev => [...Array.from(new Set([...prev, ...matchingTags.map(t => t.id)]))]);
+      // Auto-tagging: select matching existing tags
+      const matchingTags = tags.filter(t =>
+        result.suggestedTags.some(suggested => suggested.toLowerCase() === t.name.toLowerCase())
+      );
+      setSelectedTagIds(prev =>
+        [...Array.from(new Set([...prev, ...matchingTags.map(t => t.id)]))]
+      );
     }
     setIsAnalyzing(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Prepare tags to create from any new tag name that isn't empty and doesn't already exist
+    const trimmedNewTag = newTagName.trim();
+    const tagsToCreate: Omit<Tag, 'id'>[] = [];
+    let updatedSelectedTagIds = [...selectedTagIds];
+
+    if (trimmedNewTag) {
+      const existing = tags.find(t => t.name.toLowerCase() === trimmedNewTag.toLowerCase());
+      if (existing) {
+        if (!updatedSelectedTagIds.includes(existing.id)) {
+          updatedSelectedTagIds.push(existing.id);
+        }
+      } else {
+        // Color heuristic: reuse first tag color or default
+        const fallbackColor = tags[0]?.color || '#3B82F6';
+        tagsToCreate.push({
+          name: trimmedNewTag,
+          color: fallbackColor,
+        });
+      }
+    }
+
     onSave({
       url,
       imageUrl: imageUrl || undefined,
       title,
       description,
       folderId: folderId || null,
-      tags: selectedTagIds,
+      tags: updatedSelectedTagIds,
       type
-    });
+    }, tagsToCreate.length ? tagsToCreate : undefined);
     onClose();
   };
 
@@ -270,34 +297,52 @@ const BookmarkModal: React.FC<BookmarkModalProps> = ({ isOpen, onClose, onSave, 
 
                         {/* Tags */}
                         <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 mb-1">
-                                <IconHash className="w-3.5 h-3.5 text-muted-foreground" />
-                                <Label className="mb-0 text-foreground">Tags</Label>
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                    <IconHash className="w-3.5 h-3.5 text-muted-foreground" />
+                                    <Label className="mb-0 text-foreground">Tags</Label>
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-2 p-3 border border-input rounded-xl bg-background/50 max-h-[120px] overflow-y-auto custom-scrollbar">
-                                {tags.map(tag => {
-                                    const isSelected = selectedTagIds.includes(tag.id);
-                                    return (
-                                        <button
-                                            key={tag.id}
-                                            type="button"
-                                            onClick={() => toggleTag(tag.id)}
-                                            className={cn(
-                                                "group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border",
-                                                isSelected 
-                                                    ? "bg-primary text-primary-foreground border-primary shadow-sm" 
-                                                    : "bg-background text-muted-foreground border-border hover:border-zinc-300 hover:text-foreground"
-                                            )}
-                                        >
-                                            <span 
-                                                className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-white/80" : "bg-zinc-400 group-hover:bg-zinc-500")}
-                                                style={!isSelected ? { backgroundColor: tag.color } : {}}
-                                            />
-                                            {tag.name}
-                                            {isSelected && <IconCheck className="w-3 h-3 ml-0.5" strokeWidth={3} />}
-                                        </button>
-                                    );
-                                })}
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap gap-2 p-3 border border-input rounded-xl bg-background/50 max-h-[120px] overflow-y-auto custom-scrollbar">
+                                    {tags.map(tag => {
+                                        const isSelected = selectedTagIds.includes(tag.id);
+                                        return (
+                                            <button
+                                                key={tag.id}
+                                                type="button"
+                                                onClick={() => toggleTag(tag.id)}
+                                                className={cn(
+                                                    "group flex items-center justify-center gap-1.5 px-2.5 py-2.5 rounded-full text-xs font-medium transition-all duration-200 border",
+                                                    isSelected 
+                                                        ? "bg-primary text-primary-foreground border-primary shadow-sm" 
+                                                        : "bg-background text-muted-foreground border-border hover:border-zinc-300 hover:text-foreground"
+                                                )}
+                                            >
+                                                <span 
+                                                    className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", isSelected ? "bg-white/80" : "bg-zinc-400 group-hover:bg-zinc-500")}
+                                                    style={!isSelected ? { backgroundColor: tag.color } : {}}
+                                                />
+                                                <span className="flex items-center leading-none">{tag.name}</span>
+                                                {isSelected && <IconCheck className="w-3 h-3 ml-0.5 flex-shrink-0" strokeWidth={3} />}
+                                            </button>
+                                        );
+                                    })}
+                                    {tags.length === 0 && (
+                                        <span className="text-[11px] text-muted-foreground">
+                                            Henüz tag yok, aşağıdan yeni bir tane ekleyebilirsin.
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        type="text"
+                                        value={newTagName}
+                                        onChange={(e) => setNewTagName(e.target.value)}
+                                        placeholder="Create a new tag (ex. Research)"
+                                        className="h-8 text-xs font-sans"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

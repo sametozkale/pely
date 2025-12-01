@@ -57,13 +57,13 @@ const Checkbox = ({ checked, onChange }: { checked: boolean; onChange: (e: React
     <div 
       onClick={(e) => { e.stopPropagation(); onChange(e); }}
       className={cn(
-        "w-5 h-5 rounded-[6px] border flex items-center justify-center cursor-pointer transition-all duration-200 bg-background",
+        "w-3 h-3 rounded-[4px] border flex items-center justify-center cursor-pointer transition-all duration-200 bg-background",
         checked 
           ? "bg-primary border-primary text-primary-foreground" 
           : "border-muted-foreground/30 hover:border-muted-foreground/60"
       )}
     >
-      {checked && <IconCheck className="w-3.5 h-3.5" />}
+      {checked && <IconCheck className="w-2 h-2" />}
     </div>
   );
 };
@@ -118,13 +118,19 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
   const renderTags = (max = 3) => (
     <>
       {bookmarkTags.slice(0, max).map(tag => (
-        <span key={tag.id} className="inline-flex items-center text-[10px] text-muted-foreground font-medium font-sans bg-secondary/50 px-1.5 py-0.5 rounded-[4px] border border-border/20 whitespace-nowrap">
-          <span className="w-1.5 h-1.5 rounded-full mr-1.5 shrink-0" style={{ backgroundColor: tag.color }}></span>
-          {tag.name}
+        <span
+          key={tag.id}
+          className="inline-flex items-center justify-center text-[10px] text-muted-foreground font-medium font-sans bg-secondary/50 px-2 py-1.5 rounded-full border border-border/20 whitespace-nowrap"
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full mr-1.5 shrink-0 flex-shrink-0"
+            style={{ backgroundColor: tag.color }}
+          />
+          <span className="leading-none flex items-center">{tag.name}</span>
         </span>
       ))}
       {bookmarkTags.length > max && (
-        <span className="inline-flex items-center text-[10px] text-muted-foreground/70 px-1.5 py-0.5 bg-secondary/30 rounded-[4px]">
+        <span className="inline-flex items-center justify-center text-[10px] text-muted-foreground/70 px-1.5 py-1.5 bg-secondary/30 rounded-[4px]">
           +{bookmarkTags.length - max}
         </span>
       )}
@@ -145,7 +151,7 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
         )}
       >
         {/* Checkbox */}
-        <div className="shrink-0 flex items-center justify-center w-5 h-5">
+        <div className="shrink-0 flex items-center justify-center">
             <Checkbox checked={isSelected} onChange={() => onToggleSelect(bookmark.id)} />
         </div>
 
@@ -196,36 +202,39 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-1 w-20 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center justify-end gap-1.5 w-28 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
             <button 
                 onClick={handleArchiveClick} 
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded shadow-sm transition-all cursor-pointer"
+                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded-md shadow-sm transition-all cursor-pointer"
                 title={bookmark.isArchived ? "Restore" : "Archive"}
             >
-                {bookmark.isArchived ? <IconUndo className="w-3 h-3" /> : <IconArchive className="w-3 h-3" />}
+                {bookmark.isArchived ? <IconUndo className="w-3.5 h-3.5" /> : <IconArchive className="w-3.5 h-3.5" />}
             </button>
             <button 
                 onClick={handleEditClick} 
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded shadow-sm transition-all cursor-pointer"
+                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded-md shadow-sm transition-all cursor-pointer"
+                title="Edit"
             >
-                <IconEdit className="w-3 h-3" />
+                <IconEdit className="w-3.5 h-3.5" />
             </button>
              {bookmark.url && !bookmark.isArchived && (
                 <a 
                     href={bookmark.url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded shadow-sm transition-all"
+                    className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border/50 rounded-md shadow-sm transition-all"
                     onClick={(e) => e.stopPropagation()}
+                    title="Open link"
                 >
-                    <IconExternalLink className="w-3 h-3" />
+                    <IconExternalLink className="w-3.5 h-3.5" />
                 </a>
              )}
             <button 
                 onClick={handleDeleteClick} 
-                className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 hover:border-red-100 border border-transparent rounded shadow-sm transition-all cursor-pointer"
+                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-red-50 hover:border-red-100 border border-transparent rounded-md shadow-sm transition-all cursor-pointer"
+                title="Delete"
             >
-                <IconTrash className="w-3 h-3" />
+                <IconTrash className="w-3.5 h-3.5" />
             </button>
         </div>
 
@@ -238,34 +247,37 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
     <div 
         onClick={(e) => e.stopPropagation()}
         className={cn(
-            "flex items-center gap-1 p-1.5 rounded-full bg-background/80 backdrop-blur-md border border-border/50 shadow-sm transition-all duration-200 z-40",
+            "flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-background/95 backdrop-blur-md border border-border/60 shadow-lg transition-all duration-200 z-40",
             isSelected ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"
         )}
     >
        <button 
            onClick={handleArchiveClick} 
-           className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-full transition-colors cursor-pointer"
+           className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-full transition-colors cursor-pointer"
            title={bookmark.isArchived ? "Restore" : "Archive"}
        >
            {bookmark.isArchived ? <IconUndo className="w-3.5 h-3.5" /> : <IconArchive className="w-3.5 h-3.5" />}
        </button>
        <button 
            onClick={handleEditClick} 
-           className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-full transition-colors cursor-pointer"
+           className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-full transition-colors cursor-pointer"
+           title="Edit"
        >
            <IconEdit className="w-3.5 h-3.5" />
        </button>
        <button 
            onClick={handleDeleteClick} 
-           className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 hover:border-red-100 rounded-full transition-colors cursor-pointer"
+           className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-red-50 hover:border-red-100 rounded-full transition-colors cursor-pointer"
            title="Delete"
        >
            <IconTrash className="w-3.5 h-3.5" />
        </button>
        
-       <div className="w-px h-3.5 bg-border/60 mx-0.5" />
+       <div className="w-px h-3 bg-border/60 mx-0.5" />
        
-       <Checkbox checked={isSelected} onChange={() => onToggleSelect(bookmark.id)} />
+       <div className="pl-0.5">
+         <Checkbox checked={isSelected} onChange={() => onToggleSelect(bookmark.id)} />
+       </div>
     </div>
   );
 
@@ -355,8 +367,8 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
                     <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent pointer-events-none" />
                 </div>
             </div>
-             <div className="px-5 pb-4 pt-0 flex items-center justify-between">
-                 <div className="flex flex-wrap gap-1.5 overflow-hidden h-5 items-center">
+             <div className="px-5 pb-4 pt-0 flex items-center justify-between bg-card group-hover:bg-secondary/10 transition-colors">
+                 <div className="flex flex-wrap gap-1.5 items-center">
                    {renderTags(3)}
                  </div>
                  <span className="text-[10px] text-muted-foreground/60 font-mono">
@@ -413,7 +425,7 @@ const BookmarkCard: React.FC<BookmarkCardProps> = ({
       </div>
 
       <div className="px-5 pb-4 pt-0 flex items-center justify-between bg-card group-hover:bg-secondary/10 transition-colors">
-        <div className="flex flex-wrap gap-1.5 overflow-hidden h-5 items-center">
+        <div className="flex flex-wrap gap-1.5 items-center">
            {renderTags(3)}
         </div>
         

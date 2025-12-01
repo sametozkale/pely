@@ -13,6 +13,7 @@ import {
   ExternalLink, 
   Menu, 
   ChevronRight, 
+  ArrowRight,
   MoreHorizontal,
   X,
   Check,
@@ -147,4 +148,8 @@ export const IconUndo = ({ className }: { className?: string }) => (
 
 export const IconCopy = ({ className }: { className?: string }) => (
   <AnimatedIcon icon={Copy} className={className} animation="scale" />
+);
+
+export const IconArrowRight = ({ className }: { className?: string }) => (
+  <ArrowRight className={className} strokeWidth={1.5} />
 );

@@ -10,6 +10,9 @@ export interface Folder {
   name: string;
   parentId: string | null;
   level: number; // For indentation
+  icon?: string; // Optional icon identifier
+  color?: string; // Optional hex color code
+  order?: number; // Optional order for sorting
 }
 
 export type BookmarkType = 'LINK' | 'IMAGE' | 'NOTE';
